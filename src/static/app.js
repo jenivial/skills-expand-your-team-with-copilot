@@ -841,9 +841,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Social sharing functions
+  function sanitizeText(text, maxLength = 200) {
+    // Remove any potentially problematic characters and limit length
+    const sanitized = String(text).replace(/[<>]/g, "").trim();
+    return sanitized.length > maxLength
+      ? sanitized.substring(0, maxLength) + "..."
+      : sanitized;
+  }
+
   function shareOnFacebook(activityName, description, schedule) {
     const url = window.location.href;
-    const shareText = `Check out ${activityName} at Mergington High School! ${description}`;
+    const sanitizedName = sanitizeText(activityName, 100);
+    const sanitizedDescription = sanitizeText(description, 150);
+    const shareText = `Check out ${sanitizedName} at Mergington High School! ${sanitizedDescription}`;
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
       url
     )}&quote=${encodeURIComponent(shareText)}`;
@@ -852,7 +862,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function shareOnTwitter(activityName, description, schedule) {
     const url = window.location.href;
-    const shareText = `Check out ${activityName} at Mergington High School! ${description} - Schedule: ${schedule}`;
+    const sanitizedName = sanitizeText(activityName, 80);
+    const sanitizedDescription = sanitizeText(description, 100);
+    const sanitizedSchedule = sanitizeText(schedule, 50);
+    const shareText = `Check out ${sanitizedName} at Mergington High School! ${sanitizedDescription} - Schedule: ${sanitizedSchedule}`;
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       shareText
     )}&url=${encodeURIComponent(url)}`;
@@ -861,12 +874,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function shareViaEmail(activityName, description, schedule) {
     const url = window.location.href;
-    const subject = `Check out ${activityName} at Mergington High School`;
-    const body = `Hi,\n\nI wanted to share this activity with you:\n\n${activityName}\n${description}\n\nSchedule: ${schedule}\n\nLearn more: ${url}\n\nBest regards`;
+    const sanitizedName = sanitizeText(activityName, 100);
+    const sanitizedDescription = sanitizeText(description, 300);
+    const sanitizedSchedule = sanitizeText(schedule, 100);
+    const subject = `Check out ${sanitizedName} at Mergington High School`;
+    const body = `Hi,\n\nI wanted to share this activity with you:\n\n${sanitizedName}\n${sanitizedDescription}\n\nSchedule: ${sanitizedSchedule}\n\nLearn more: ${url}\n\nBest regards`;
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
+    
+    // Use anchor element to trigger email without navigating away
+    const tempLink = document.createElement("a");
+    tempLink.href = mailtoUrl;
+    tempLink.click();
   }
 
   // Handle form submission
