@@ -552,6 +552,18 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="social-sharing">
+        <span class="share-label">Share:</span>
+        <button class="share-button facebook-share" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on Facebook">
+          <span class="share-icon">f</span>
+        </button>
+        <button class="share-button twitter-share" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share on Twitter">
+          <span class="share-icon">𝕏</span>
+        </button>
+        <button class="share-button email-share" data-activity="${name}" data-description="${details.description}" data-schedule="${formattedSchedule}" title="Share via Email">
+          <span class="share-icon">✉</span>
+        </button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -586,6 +598,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handlers for social sharing buttons
+    const facebookButton = activityCard.querySelector(".facebook-share");
+    const twitterButton = activityCard.querySelector(".twitter-share");
+    const emailButton = activityCard.querySelector(".email-share");
+
+    facebookButton.addEventListener("click", () => {
+      shareOnFacebook(name, details.description, formattedSchedule);
+    });
+
+    twitterButton.addEventListener("click", () => {
+      shareOnTwitter(name, details.description, formattedSchedule);
+    });
+
+    emailButton.addEventListener("click", () => {
+      shareViaEmail(name, details.description, formattedSchedule);
+    });
 
     activitiesList.appendChild(activityCard);
   }
@@ -809,6 +838,55 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       messageDiv.classList.add("hidden");
     }, 5000);
+  }
+
+  // Social sharing functions
+  function sanitizeText(text, maxLength = 200) {
+    // Remove any potentially problematic characters and limit length
+    const sanitized = String(text).replace(/[<>]/g, "").trim();
+    return sanitized.length > maxLength
+      ? sanitized.substring(0, maxLength) + "..."
+      : sanitized;
+  }
+
+  function shareOnFacebook(activityName, description, schedule) {
+    const url = window.location.href;
+    const sanitizedName = sanitizeText(activityName, 100);
+    const sanitizedDescription = sanitizeText(description, 150);
+    const shareText = `Check out ${sanitizedName} at Mergington High School! ${sanitizedDescription}`;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      url
+    )}&quote=${encodeURIComponent(shareText)}`;
+    window.open(facebookUrl, "_blank", "width=600,height=400");
+  }
+
+  function shareOnTwitter(activityName, description, schedule) {
+    const url = window.location.href;
+    const sanitizedName = sanitizeText(activityName, 80);
+    const sanitizedDescription = sanitizeText(description, 100);
+    const sanitizedSchedule = sanitizeText(schedule, 50);
+    const shareText = `Check out ${sanitizedName} at Mergington High School! ${sanitizedDescription} - Schedule: ${sanitizedSchedule}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      shareText
+    )}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, "_blank", "width=600,height=400");
+  }
+
+  function shareViaEmail(activityName, description, schedule) {
+    const url = window.location.href;
+    const sanitizedName = sanitizeText(activityName, 100);
+    const sanitizedDescription = sanitizeText(description, 300);
+    const sanitizedSchedule = sanitizeText(schedule, 100);
+    const subject = `Check out ${sanitizedName} at Mergington High School`;
+    const body = `Hi,\n\nI wanted to share this activity with you:\n\n${sanitizedName}\n${sanitizedDescription}\n\nSchedule: ${sanitizedSchedule}\n\nLearn more: ${url}\n\nBest regards`;
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+    
+    // Use anchor element to trigger email without navigating away
+    const tempLink = document.createElement("a");
+    tempLink.href = mailtoUrl;
+    tempLink.click();
   }
 
   // Handle form submission
